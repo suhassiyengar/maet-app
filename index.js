@@ -8,9 +8,9 @@ import { fileURLToPath } from "url";
 
 dotenv.config();
 
-// --- ⬇️ IT GOES RIGHT HERE ⬇️ ---
+// --- ⬇️ HERE IS THE DEBUGGING LINE ⬇️ ---
 console.log("DEBUG: My MONGODB_URI variable is:", process.env.MONGODB_URI);
-// --- ⬆️ IT GOES RIGHT HERE ⬆️ ---
+// --- ⬆️ END OF DEBUGGING LINE ⬆️ ---
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
