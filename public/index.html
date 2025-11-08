@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Medicine Alternatives — Local Proxy</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Comfortaa font (same as about.html) -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #000000;
+      --card: #374151;
+      --muted: #9ca3af;
+      --muted-bright: #cbd5e1;
+      --primary: #60a5fa;
+      --accent: #fbbf24;
+      --danger: #f87171;
+      --radius: 10px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+    html,body { height:100%; }
+body {
+  font-family: 'Segoe UI', Roboto, system-ui, -apple-system, Arial, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: #f3f4f6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* PARTICLE CANVAS - placed behind content */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+/* Overlay */
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(7,12,18,0.25), rgba(7,10,15,0.5));
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Page content sits above canvas + overlay */
+.page { position: relative; z-index: 2; }
+
+/* --- ADDED: fade-in-once class (visible state) --- */
+/* keep fade animation but preserve layout height so page can scroll */
+.row {
+  opacity: 0;
+  transform: translateY(-10px);
+  /* don't collapse the element's height — allow normal flow for scrolling */
+  max-height: none;
+  overflow: visible;
+  pointer-events: none;
+  transition: opacity 0.36s ease, transform 0.36s ease;
+}
+.row.fade-in-once {
+  opacity: 1;
+  transform: translateY(0);
+  /* no max-height toggle needed */
+  pointer-events: auto;
+}
+
+/* --- end added rules --- */
+
+/* HEADER (aligned / styled to match about.html) */
+.header-wrapper {
+  background: transparent;
+  margin-bottom: 24px;
+  box-shadow: none;
+  border-radius: 0;
+  width: 100%;
+}
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 100%;
+}
+
+/* Brand title (matches about.html .brand-title) */
+.brand-title {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 300; /* thin look */
+  font-size: 3.3rem; /* bigger than About link */
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  transition: color 0.4s ease;
+  padding-left: 2%;
+  padding-top: 2px;
+}
+
+/* About link styled like about.html's link */
+.about-link {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 300;
+  font-size: 1.1rem;
+  color: #ffffff;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.4s ease;
+  padding-right: 6%;
+}
+
+/* Hover glow to blue */
+.brand-title:hover,
+.about-link:hover {
+  color: var(--primary);
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+/* glass style shared with search */
+.glass {
+  background: rgba(1, 4, 6, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.32s cubic-bezier(.2,.9,.2,1);
+}
+.glass:hover,
+.glass:focus-within {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(15, 23, 32, 0.4);
+  box-shadow: 0 8px 24px rgba(96,165,250,0.15);
+}
+
+/* Search specific */
+.search { margin-bottom: 18px; }
+.search input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--muted-bright);
+  border-radius: 8px;
+}
+.search input::placeholder { color: var(--muted-bright); opacity: 0.9; }
+
+/* Layout */
+.row { display: flex; gap: 16px; align-items: flex-start; }
+.left { flex: 1 1 35%; }
+.right { flex: 1 1 60%; }
+
+@media (max-width: 800px){
+  .row { flex-direction: column; }
+  .left, .right { flex: 1 1 100%; }
+  .header-wrapper { margin-top: 10px; }
+  .brand-title { font-size: 2rem; padding-left: 6%; padding-top: 6px; }
+  .about-link { font-size: 1.05rem; padding-right: 4%; }
+}
+
+/* Items & cards */
+.item {
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(96,165,250,0.08);
+  border-color: rgba(96,165,250,0.18);
+}
+
+/* Reuse .card for interior boxed content */
+.card { background: transparent; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+
+/* price / badges */
+.badge { display:inline-block; padding:4px 8px; border-radius:8px; font-size:12px; margin-left:8px; }
+.badge.same { background: #1e40af; color: #bfdbfe; }
+.badge.diff { background: #7c2d12; color: #ffedd5; }
+
+.small { color: var(--muted); font-size: 0.95rem; }
+.muted { color: #888; font-size: 0.95rem; }
+.loading { color: var(--primary); font-style: italic; }
+.error { color: var(--danger); font-weight: 600; background: rgba(248, 113, 113, 0.1); padding:8px; border-radius:6px; }
+
+/* Selected panel: now uses .glass + animated show/hide */
+#selected { padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); }
+#selected strong { color: var(--primary); font-size: 1.05rem; display:block; margin-bottom:6px; }
+
+ /* Alternatives: each alt will be .alt.card.glass for glass effect */
+.alt { padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:12px; background: transparent; }
+
+ /* Price highlight */
+.price {
+  display:inline-block;
+  background: rgba(245,158,11,0.09);
+  color: var(--accent);
+  padding:6px 10px;
+  border-radius:8px;
+  font-weight:700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.price-label { color: var(--muted); font-weight:600; margin-right:6px; font-size:0.9rem; }
+
+.sort-select {
+  background: rgba(15, 23, 32, 0.75); /* semi-transparent dark glass */
+  color: var(--muted-bright);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.95rem;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  backdrop-filter: blur(6px);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* On hover / focus */
+.sort-select:hover,
+.sort-select:focus {
+  background: rgba(25, 35, 50, 0.9);
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+/* Dropdown menu (for most browsers) */
+.sort-select option {
+  background-color: #0b0f14; /* dark backdrop */
+  color: var(--muted-bright);
+  border: none;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 380ms cubic-bezier(.2,.9,.2,1), transform 380ms cubic-bezier(.2,.9,.2,1);
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+}
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: opacity 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1);
+  height: auto;
+}
+
+/* ensure alternatives container preserves flow when hidden */
+#alternatives.hidden { height: 0; margin-top: 0; }
+#alternatives.visible { margin-top: 12px; }
+
+.item:focus { outline: none; box-shadow: 0 6px 18px rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.2); }
+  /* Footer */
+footer {
+  text-align: center;
+  color: #9ca3af;          /* grey */
+  font-size: 0.85rem;      /* small text */
+  padding: 24px 12px;      /* spacing */
+  margin-top: 40px;        /* some gap above footer */
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  padding-top: 90%;
+}
+
+footer span {
+  display: inline-block;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+footer:hover {
+  color: #60a5fa;           /* light blue hover */
+  text-shadow: 0 0 8px rgba(96,165,250,0.4);
+  opacity: 1;
+}
+
+  </style>
+
+</head>
+<body>
+  <!-- Particle Canvas -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <div class="page">
+    <header class="header-wrapper">
+      <div class="header-content">
+        <h1 class="brand-title">mate</h1>
+        <a href="about.html" class="about-link">About</a>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="search-wrap">
+        <div class="search glass">
+          <input id="search" type="search" placeholder="Type medicine name (e.g. Calpol, Dolo, Paracetamol)" />
+        </div>
+      </div>
+
+      <div class="row" id="fadeRow">
+        <div class="left">
+          <h3>Matches</h3>
+          <div id="matches"><div class="small muted">Type to search</div></div>
+        </div>
+
+        <div class="right">
+          <h3>Selected</h3>
+          <!-- start hidden — will appear when a selection is made -->
+          <div id="selected" class="card glass hidden">No selection</div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h3 style="margin:0">Alternatives</h3>
+              <span id="altCount" class="small muted" style="margin-left:8px">—</span>
+            </div>
+
+            <div class="alt-header">
+              <label for="sortSelect" class="small muted" style="margin-right:6px;">Sort:</label>
+              <select id="sortSelect" class="sort-select" title="Sort alternatives by price">
+                <option value="default">Default</option>
+                <option value="low-high">Price: Low → High</option>
+                <option value="high-low">Price: High → Low</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- alternatives container; hidden by default -->
+          <div id="alternatives" class="hidden"></div>
+        </div>
+
+      </div>
+
+          <!-- Footer -->
+    <footer>
+      <span>⚠️ This website is for informational and educational purposes only.</span>
+    </footer>
+  </div>
+
+  <!-- scripts remain unchanged -->
+
+    </div>
+    
+
+<script>
+  // --- search / UI JS (fully fixed + features) ---
+  const API_BASE = "http://localhost:3000/api";
+
+  function escapeHtml(s){
+    if(!s) return '';
+    return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function extractId(doc){
+    if(!doc) return "";
+    if(typeof doc._id === "string") return doc._id;
+    if(doc._id?.$oid) return doc._id.$oid;
+    if(doc._id && typeof doc._id === "object" && doc._id.toString) return doc._id.toString();
+    return "";
+  }
+
+  async function callProxy(endpoint){
+    const res = await fetch(API_BASE + endpoint);
+    if(!res.ok){
+      const text = await res.text().catch(()=>res.statusText);
+      throw new Error(text || 'API error');
+    }
+    return res.json();
+  }
+
+  async function searchMedicines(q){
+    const url = `/search?q=${encodeURIComponent(q)}&page=0&size=50`;
+    const json = await callProxy(url);
+    return json.documents || [];
+  }
+
+  async function getMedicineById(id){
+    const json = await callProxy(`/medicines/${encodeURIComponent(id)}`);
+    return json.document || null;
+  }
+
+  async function getAlternativesById(id){
+    const json = await callProxy(`/medicines/${encodeURIComponent(id)}/alternatives`);
+    return json.documents || [];
+  }
+
+  // price parsing & display helpers
+  function parsePrice(v){
+    if(v === null || v === undefined) return NaN;
+    if(typeof v === 'number') return v;
+    const s = String(v).replace(/[^\d\.]/g,'');
+    if(!s) return NaN;
+    return Number(s);
+  }
+  function displayPrice(v){
+    if(v === null || v === undefined) return '—';
+    if(typeof v === 'number') return '₹' + Number(v).toFixed(2);
+    const s = String(v).trim();
+    if(/[₹£$€]|[a-zA-Z]/.test(s)) return s; // already has symbol or text
+    const n = parsePrice(s);
+    return isNaN(n) ? s : '₹' + n.toFixed(2);
+  }
+
+  const searchEl = document.getElementById('search');
+  const matchesEl = document.getElementById('matches');
+  const selectedEl = document.getElementById('selected');
+  const altsContainerEl = document.getElementById('alternatives');
+  const sortSelect = document.getElementById('sortSelect') || (function(){ const s = document.createElement('select'); s.value='default'; return s; })();
+  const altCountEl = document.getElementById('altCount');
+
+  let currentAlternatives = [];
+  let currentBase = null;
+  let debounce;
+
+  // init: ensure selected & alternatives are hidden
+  selectedEl.classList.add('hidden');
+  altsContainerEl.classList.add('hidden');
+
+  searchEl.addEventListener('input', e=>{
+    clearTimeout(debounce);
+    debounce = setTimeout(()=>doSearch(e.target.value.trim()),300);
+  });
+
+  // helper to show/hide selection + alternatives
+  function showSelectionPanel(){
+    selectedEl.classList.remove('hidden');
+    selectedEl.classList.add('visible');
+    altsContainerEl.classList.remove('hidden');
+    altsContainerEl.classList.add('visible');
+  }
+  function hideSelectionPanel(){
+    selectedEl.classList.remove('visible');
+    selectedEl.classList.add('hidden');
+    altsContainerEl.classList.remove('visible');
+    altsContainerEl.classList.add('hidden');
+  }
+
+  async function doSearch(q){
+    // when user types a new query, hide previous selection & alternatives (until they pick)
+    hideSelectionPanel();
+    matchesEl.innerHTML = '<div class="loading">Searching...</div>';
+    selectedEl.innerHTML = 'No selection';
+    selectedEl.classList.add('hidden');
+    altsContainerEl.innerHTML = '';
+    if(altCountEl) altCountEl.textContent = '—';
+    currentAlternatives = [];
+    currentBase = null;
+    if(!q){ matchesEl.innerHTML='<div class="small muted">Type to search</div>'; return; }
+    try{
+      const docs = await searchMedicines(q);
+      if(!docs.length){ matchesEl.innerHTML='<div class="small muted">No matches</div>'; return; }
+      matchesEl.innerHTML = docs.map(d=>{
+        const id = escapeHtml(extractId(d));
+        const brand = escapeHtml(d.brand_name||d.name||'');
+        const comp = escapeHtml(d.composition||'');
+        const manu = escapeHtml(d.manufacturer||'');
+        const priceText = (d.price !== undefined && d.price !== null) ? `<span class="price"><span class="price-label">Price:</span>${escapeHtml(displayPrice(d.price))}</span>` : '';
+        return `<div class="item" tabindex="0" data-id="${id}">
+          <strong>${brand}</strong>
+          <div class="small">${comp} • ${manu} ${priceText}</div>
+        </div>`;
+      }).join('');
+      matchesEl.querySelectorAll('.item').forEach(el=>{
+        el.addEventListener('click', ()=> selectById(el.dataset.id));
+        el.addEventListener('keypress', (ev)=>{ if(ev.key==='Enter') selectById(el.dataset.id); });
+      });
+    }catch(err){
+      matchesEl.innerHTML = `<div class="error">Error: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  async function selectById(id){
+    // show loading & ensure selection area visible (we'll animate in)
+    selectedEl.innerHTML = '<div class="loading">Loading...</div>';
+    selectedEl.classList.remove('hidden');
+    altsContainerEl.innerHTML = '<div class="small muted">Loading alternatives...</div>';
+    if(altCountEl) altCountEl.textContent = '—';
+    currentAlternatives = [];
+    currentBase = null;
+    try{
+      const doc = await getMedicineById(id);
+      if(!doc){ selectedEl.innerHTML = '<div class="small muted">Not found</div>'; return; }
+      currentBase = doc;
+      renderSelected(doc);
+      const alts = await getAlternativesById(id);
+      currentAlternatives = alts || [];
+      renderAlternatives();
+      // animate them into view after content is ready
+      requestAnimationFrame(()=> showSelectionPanel());
+    }catch(err){
+      selectedEl.innerHTML = `<div class="error">Error: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  function renderSelected(doc){
+    // use .card + .glass styling to keep appearance consistent
+    selectedEl.innerHTML = `
+      <div class="card glass">
+        <strong>${escapeHtml(doc.brand_name||'')}</strong>
+        <div class="small">Composition: ${escapeHtml(doc.composition||'')}</div>
+        <div class="small">Manufacturer: ${escapeHtml(doc.manufacturer||'')}</div>
+        <div class="small">Form: ${escapeHtml(doc.dosage_form||'')}</div>
+        <div class="small"><span class="price"><span class="price-label">Price:</span>${escapeHtml(displayPrice(doc.price))}</span></div>
+      </div>`;
+  }
+
+  function renderAlternatives(){
+    if(!currentAlternatives || currentAlternatives.length === 0){
+      altsContainerEl.innerHTML = '<div class="small muted">No alternatives</div>';
+      if(altCountEl) altCountEl.textContent = '0';
+      return;
+    }
+    const list = currentAlternatives.slice();
+    const sortVal = (document.getElementById('sortSelect') && document.getElementById('sortSelect').value) || 'default';
+    if(sortVal === 'low-high'){
+      list.sort((a,b)=> {
+        const pa = parsePrice(a.price);
+        const pb = parsePrice(b.price);
+        if(isNaN(pa) && isNaN(pb)) return 0;
+        if(isNaN(pa)) return 1;
+        if(isNaN(pb)) return -1;
+        return pa - pb;
+      });
+    } else if(sortVal === 'high-low'){
+      list.sort((a,b)=> {
+        const pa = parsePrice(a.price);
+        const pb = parsePrice(b.price);
+        if(isNaN(pa) && isNaN(pb)) return 0;
+        if(isNaN(pa)) return 1;
+        if(isNaN(pb)) return -1;
+        return pb - pa;
+      });
+    }
+
+    if(altCountEl) altCountEl.textContent = `${list.length} found`;
+
+    const baseId = extractId(currentBase);
+    altsContainerEl.innerHTML = list.filter(d=>extractId(d)!==baseId).map((a,idx)=>{
+      const priceText = (a.price !== undefined && a.price !== null)
+        ? `<div class="price"><span class="price-label">Price:</span>${escapeHtml(displayPrice(a.price))}</div>`
+        : `<div class="small muted">Price: —</div>`;
+      // each alt uses glass style and will be visible when container is shown
+      return `<div class="alt card glass" data-idx="${idx}">
+        <div class="meta">
+          <strong>${escapeHtml(a.brand_name||'')}</strong>
+          <div class="small">${escapeHtml(a.composition||'')} • ${escapeHtml(a.manufacturer||'')}</div>
+        </div>
+        <div class="right">${priceText}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // sort select listener (if present)
+  const sortEl = document.getElementById('sortSelect');
+  if(sortEl) sortEl.addEventListener('change', ()=> {
+    renderAlternatives();
+  });
+  </script>
+
+<!-- ✨ first-click fade-in (only once) -->
+<script>
+(function(){
+  const search = document.getElementById('search');
+  const row = document.getElementById('fadeRow');
+  if(!search || !row) return;
+  function onFirst() {
+    // add class to trigger fade-in
+    row.classList.add('fade-in-once');
+    // remove listeners so it only runs once
+    search.removeEventListener('focus', onFirst);
+    search.removeEventListener('click', onFirst);
+  }
+  // listen for focus (keyboard) and click (mouse/touch)
+  search.addEventListener('focus', onFirst, { once: true });
+  search.addEventListener('click', onFirst, { once: true });
+})();
+</script>
+
+<!-- Particle script (unchanged) -->
+<script>
+/* ---------------------------
+   PARTICLES BACKGROUND (particles only — no connecting lines)
+   - Lightweight, high-DPI aware
+   - Keeps gentle drift + mouse repulse
+   --------------------------- */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  // Particle params
+  const PARTICLE_DENSITY = 0.00012; // particles per px^2
+  const PARTICLE_SIZE_MIN = 0.6;
+  const PARTICLE_SIZE_MAX = 3;
+  const PARTICLE_SPEED = 0.5; // global speed scalar
+
+  let particles = [];
+  let width = 0, height = 0, area = 0;
+
+  function resize() {
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    area = width * height;
+    const targetCount = Math.max(25, Math.floor(area * PARTICLE_DENSITY));
+    adjustParticleCount(targetCount);
+  }
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = rand(0, width);
+      this.y = rand(0, height);
+      const angle = rand(0, Math.PI * 2);
+      const speed = rand(0.05, 0.9) * PARTICLE_SPEED;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.size = rand(PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
+      this.alpha = rand(0.2, 0.9);
+      this.drift = rand(-0.02, 0.02);
+    }
+    update() {
+      this.x += this.vx + this.drift;
+      this.y += this.vy;
+      if(this.x < -10) this.x = width + 10;
+      if(this.x > width + 10) this.x = -10;
+      if(this.y < -10) this.y = height + 10;
+      if(this.y > height + 10) this.y = -10;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(180,200,255,' + (this.alpha * 0.9) + ')';
+      ctx.fill();
+    }
+  }
+
+  function adjustParticleCount(target) {
+    const diff = target - particles.length;
+    if (diff > 0) {
+      for (let i = 0; i < diff; i++) particles.push(new Particle());
+    } else if (diff < 0) {
+      // safely shrink array to target length
+      particles.length = target;
+    }
+  }
+
+  let lastT = performance.now();
+  function loop(now) {
+    const dt = (now - lastT) / 1000;
+    lastT = now;
+
+    // clear canvas
+    ctx.clearRect(0,0,width,height);
+
+    // update + draw particles
+    for(let p of particles){
+      p.update();
+      p.draw();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  lastT = performance.now();
+  requestAnimationFrame(loop);
+
+  // Gentle repulse on mouse move (subtle)
+  window.addEventListener('mousemove', e=>{
+    const mx = e.clientX, my = e.clientY;
+    for(let p of particles){
+      const dx = p.x - mx;
+      const dy = p.y - my;
+      const dist2 = dx*dx + dy*dy;
+      if(dist2 < 9000){
+        const dist = Math.sqrt(dist2) || 1;
+        const push = (1 - dist/95) * 0.8;
+        p.x += (dx/dist) * push;
+        p.y += (dy/dist) * push;
+      }
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

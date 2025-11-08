@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>About Us — Mate</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Comfortaa font (same as index.html) -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Make page headings match index.html (Comfortaa) */
+h1, h2, h3 {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  margin: 0 0 12px 0;
+}
+</style>
+
+  <style>
+    :root {
+      --bg:#000000; /* Black background */
+      --muted:#9ca3af;
+      --primary:#60a5fa;
+      --radius:10px;
+      --shadow:0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:'Segoe UI',Roboto,system-ui,-apple-system,Arial;
+      color:#f3f4f6;
+      background: var(--bg);
+    }
+
+    #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+    .bg-overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg, rgba(7,12,18,0.15), rgba(7,10,15,0.35));mix-blend-mode:overlay;pointer-events:none}
+    .page{position:relative;z-index:2}
+
+    /* Header layout (keeps same structure as index.html) */
+    header{
+      background:transparent;
+      padding:16px;
+      
+      max-width:100%;
+      
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    /* Brand title (matches index.html .brand-title) */
+    .brand-title {
+      font-family: 'Comfortaa', cursive;
+      font-weight: 300; /* thin look */
+      font-size: 3.3rem; /* bigger than Home link */
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      text-decoration: none;
+      transition: color 0.4s ease;
+      padding-left: 10%;
+      padding-top: 10px;
+    }
+
+    /* Home link styled like index.html's about-link but labeled Home here */
+    .about-link{
+      font-family: 'Comfortaa', cursive;
+      font-weight: 300;
+      font-size: 1.1rem;
+      color:#ffffff;
+      text-decoration:none;
+      letter-spacing:0.5px;
+      transition: color 0.4s ease;
+      padding-right: 5%;
+      padding-top: 11px;
+    }
+    .about-link:hover { color: var(--primary); }
+
+    .container{max-width:1100px;margin:0 auto;padding:16px}
+
+    /* About section */
+    .about-section{
+      
+      background: transparent;
+      border-radius:8px;
+      padding-left: 10%;
+      
+    }
+    .about-section h2{color:var(--primary);margin-top:0}
+    .about-section h3{color:var(--primary);font-weight:300;font-size:1.1rem;margin-top:24px;margin-bottom:8px}
+    .about-section p,.about-section ul{color:var(--muted);line-height:1.7;max-width:900px}
+    .about-section ul{padding-left:20px}
+    .about-section ul li{margin-bottom:8px}
+
+    /* Team section */
+    .team-section {
+      padding: 40px 24px;
+      background: transparent;
+      text-align: center;
+    }
+
+    .team-section h2 {
+      color: var(--primary);
+      margin-bottom: 32px;
+    }
+
+    .team-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .team-card {
+      background: transparent;
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 260px;
+      border: 1px solid rgba(96,165,250,0.2);
+      transition: all 0.35s ease;
+      backdrop-filter: none;
+    }
+
+    .team-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border: 1px solid rgba(96,165,250,0.9);
+      box-shadow: 0 0 20px rgba(96,165,250,0.4);
+    }
+
+    .team-card h3 {
+      color: var(--primary);
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 300;
+    }
+
+    .team-card p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    @media(max-width:600px){
+      .team-card{width:90%;}
+      .brand-title { font-size: 2rem; } /* scale down on small screens */
+      .about-link { font-size: 1.05rem; }
+    }
+
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <div class="page">
+    <header>
+      <div class="brand">
+        <!-- use same class as index.html for consistent styling -->
+        <h1 class="brand-title">mate</h1>
+      </div>
+      <a href="index.html" class="about-link">Home</a>
+    </header>
+
+    <section id="about" class="about-section">
+      <div class="container">
+        <h2>About Us</h2>
+        <p>In a world where healthcare costs can be a significant burden, we believe finding affordable medicine shouldn't be a luxury. Access to transparent pricing and clear options is a right, not a privilege. This belief is the foundation of <strong>mate</strong>, a platform born from a desire to empower consumers and bring clarity to the often-confusing pharmaceutical market. We saw a simple problem—high medicine prices and a lack of easy-to-find alternatives—and we knew technology could be the solution.</p>
+
+        <h3>Who we are</h3>
+        <p>We are a team of passionate students driven by a shared goal: to use our skills to build tools that make a tangible difference. This platform is the result of our academic and personal efforts, built from the ground up to tackle a real-world challenge. As learners in the tech field, we were excited to apply our knowledge to a project that could genuinely help people.</p>
+
+        <h3>Built With Purpose</h3>
+        <p>This website is more than just an assignment; it's a testament to our passion for problem-solving. We built it using a modern, efficient technology stack:</p>
+        <ul>
+          <li><strong>MongoDB</strong>: To manage and store the vast, complex data of medicines and their compositions.</li>
+          <li><strong>Express.js</strong>: To create a fast, robust, and secure backend API that handles all your search requests.</li>
+          <li><strong>HTML, CSS, and JavaScript</strong>: To build the clean, responsive, and user-friendly interface you see today.</li>
+        </ul>
+
+        <h3>Our Vision</h3>
+       <p>We are incredibly proud of what we've built so far, but our vision doesn't stop here. This platform is the first step on a much longer journey. We are actively looking to expand our database to be even more comprehensive, refine our search technology with more powerful features, and improve the user experience at every turn.</p>
+       <p>Our ultimate goal is to grow <strong>mate</strong> Finder from a powerful search tool into a complete healthcare companion. We envision a future where our users can not only find the best-priced alternatives but also securely book or order their medicines directly through our platform, creating a seamless, affordable, and trustworthy bridge between patients and their healthcare needs.</p>
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+      <h2>Our Team</h2>
+      <div class="team-container">
+        <div class="team-card">
+          <h3>Suhas Sreenath Iyengar</h3>
+          <p>Developer & Backend Engineer</p>
+        </div>
+        <div class="team-card">
+          <h3>Madhukar Manvanth</h3>
+          <p>Developer & Designer</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+  (function(){
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let dpr = Math.max(1, window.devicePixelRatio || 1);
+    const PARTICLE_DENSITY = 0.00012;
+    const PARTICLE_SIZE_MIN = 0.6;
+    const PARTICLE_SIZE_MAX = 3;
+    const PARTICLE_SPEED = 0.5;
+    let particles = [], width=0, height=0;
+    function rand(a,b){return Math.random()*(b-a)+a;}
+    class Particle{
+      constructor(){this.reset()}
+      reset(){
+        this.x=rand(0,width);
+        this.y=rand(0,height);
+        const angle=rand(0,Math.PI*2);
+        const speed=rand(0.05,0.9)*PARTICLE_SPEED;
+        this.vx=Math.cos(angle)*speed;
+        this.vy=Math.sin(angle)*speed;
+        this.size=rand(PARTICLE_SIZE_MIN,PARTICLE_SIZE_MAX);
+        this.alpha=rand(0.18,0.88);
+        this.drift=rand(-0.02,0.02);
+      }
+      update(){
+        this.x+=this.vx+this.drift;
+        this.y+=this.vy;
+        if(this.x<-10)this.x=width+10;
+        if(this.x>width+10)this.x=-10;
+        if(this.y<-10)this.y=height+10;
+        if(this.y>height+10)this.y=-10;
+      }
+      draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fillStyle=`rgba(180,200,255,${this.alpha})`;
+        ctx.fill();
+      }
+    }
+    function resize(){
+      dpr=Math.max(1,window.devicePixelRatio||1);
+      width=window.innerWidth;
+      height=window.innerHeight;
+      canvas.width=Math.floor(width*dpr);
+      canvas.height=Math.floor(height*dpr);
+      canvas.style.width=width+'px';
+      canvas.style.height=height+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const target=Math.max(25,Math.floor(width*height*PARTICLE_DENSITY));
+      while(particles.length<target)particles.push(new Particle());
+      if(particles.length>target)particles.length=target;
+    }
+    function loop(){
+      ctx.clearRect(0,0,width,height);
+      for(const p of particles){p.update();p.draw();}
+      requestAnimationFrame(loop);
+    }
+    window.addEventListener('resize',resize);
+    resize();
+    loop();
+  })();
+  </script>
+</body>
+</html>
